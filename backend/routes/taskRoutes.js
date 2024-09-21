@@ -11,13 +11,15 @@ app.use((req,res,next)=>{
 
 router.route("/allTasks").get(taskController.protectRoute, taskController.getAllTasksOfUser);
 
-router.route("/").get()
-                 .post(taskController.protectRoute,taskController.createTask);
+router.route('/taskCount').get(taskController.protectRoute, taskController.getAllTaskCount);
 
-router.route("/:taskId").patch(taskController.updateTask)
-                        .delete(taskController.deleteTasks)
+router.route("/").get()
+                 .post(taskController.protectRoute, taskController.createTask);
+
+router.route("/:taskId").patch(taskController.protectRoute, taskController.updateTask)
+                        .delete(taskController.protectRoute, taskController.deleteTasks)
                         .get(taskController.getTask);
 
 
 
-module.exports = router;
+module.exports = router; 

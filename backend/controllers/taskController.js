@@ -7,7 +7,31 @@ const { connect } = require("http2");
 
 exports.getTask = (req, res) => {};
 
-exports.updateTask = (req, res) => {};
+exports.updateTask = async(req, res) => {
+  if(!req.params){
+    return new AppError("params doesn't exists",404);
+  }
+  if(!req.body){
+    return new AppError("input doesn't exists",404);
+  }
+
+  try{
+    const task = await Task.findByIdAndUpdate(req.params.taskId, req.body, {new: true});
+    return res.status(201).json({
+      status: "success",
+      data:{
+        task
+      }
+    })
+  }catch(err){
+    return res.status(404).json(
+      {
+        status: "error",
+        message: "task not found or cannot be updated!"
+      }
+    )
+  }
+};
 
 exports.createTask = async (req, res) => {
   try {
@@ -26,19 +50,31 @@ exports.createTask = async (req, res) => {
   }
 };
 
-exports.deleteTasks = (req, res) => {};
+exports.deleteTasks = async (req, res) => {
+  if (!req.params?.taskId) {
+    return AppError(404, "task id not found!");
+  }
+  try {
+    await Task.findByIdAndDelete(req.params.taskId);
+    return res.status(200).json("Task deleted successfully!");
+  } catch (err) {
+    return new AppError(404, err.message);
+  }
+};
 
 exports.getAllTasksOfUser = async (req, res) => {
   try {
     console.log("insde the getAllTaskOfUser");
     if (!req.user)
       return new AppError("User doesn't exists in the request object.", 404);
+
     let sortField = req.query.sort;
     if (!req.query.sort) {
       sortField = "-createdAt";
     }
-    let limit = 5,
-      skip = 0;
+
+    let limit = 5;
+    let skip = 0;
     if (req.query.page) {
       if (req.query.limit) limit = req.query.limit;
       const pages = req.query.page * 1 || 1;
@@ -54,7 +90,7 @@ exports.getAllTasksOfUser = async (req, res) => {
     res.status(200).json({
       status: "success",
       data: {
-        tasks: tasks,
+        tasks: tasks || [],
       },
     });
   } catch (err) {
@@ -65,11 +101,25 @@ exports.getAllTasksOfUser = async (req, res) => {
   }
 };
 
+exports.getAllTaskCount = async(req,res) => {
+  try{
+    const { _id } = req.user;
+    const taskCount = await Task.countDocuments({user: _id});
+    return res.status(200).json({
+      status: 'success',
+      count: taskCount, 
+    });
+  }catch(err){
+    return res.status(404).json({
+      status: 'error',
+      message: err.message
+    });
+  }
+};
+
 exports.protectRoute = async (req, res, next) => {
-  let token = "";
-  console.log(
-    "inside protectRouteeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
-  );
+  let token = null;
+  console.log("inside protectRouteeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
@@ -79,7 +129,11 @@ exports.protectRoute = async (req, res, next) => {
 
   //if the user has login and has token
   if (!token) {
-    return new AppError("You are not logged in. Please login first!", 401);
+    // return new AppError("You are not logged in. Please login first!", 401);
+    return res.status(401).json({
+      status: "error",
+      message:  "You are not logged in. Please login first!",
+    });
   }
 
   //if the token is valid

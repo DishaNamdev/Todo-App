@@ -14,7 +14,7 @@ const taskSchema = mongoose.Schema({
 
     createdAt: {
         type: Date,
-        default: Date.now(),
+        default: Date.now()+1,
     },
 
     endDate : {
@@ -25,7 +25,7 @@ const taskSchema = mongoose.Schema({
     user:{
         type: mongoose.Schema.ObjectId,
         ref: 'userModel'
-    }
+    },
 });
 
 const Task = mongoose.model('taskModel',taskSchema);
