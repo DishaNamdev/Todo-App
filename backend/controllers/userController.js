@@ -41,8 +41,8 @@ const upload = multer({
 exports.uploadProfilePic = upload.single("photo");
 
 exports.resizeProfilePic = (req, res, next) =>{
-
-    if(!req.file) return;
+    console.log("inside resize profile pic");
+    if(!req.file) return next();
 
     const extn = req.file.mimetype.split('/')[1];
     const filename = `user-${req.user._id}-${Date.now()}.${extn}`;
@@ -80,15 +80,15 @@ exports.createUser = async (req, res) => {
 };
 
 exports.updateUser = async (req, res) => {
-  console.log(req.file);
-  console.log(req.body);
+  console.log("req file", req.file);
+  console.log("req body",req.body);
   try {
     if (req.body.password || req.body.confirmPassword) {
         return next(
             new AppError("This route is not for password updates. Please user /updateMyPassword", 400)
         );
     }
-      let filteredObj = filterObj(JSON.parse(req.body.data), "name", "email");
+      let filteredObj = filterObj(req.body, "name", "email");
       
       //adding the filename to the database.
       if(req.file){
@@ -105,7 +105,6 @@ exports.updateUser = async (req, res) => {
           user: user,
         },
       });
-    // }
   } catch (err) {
     res.status(404).json({
       status: "error",

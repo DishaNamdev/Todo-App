@@ -14,19 +14,6 @@ app.use(express.json());
 
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
-// app.get('/', (req,res)=>{
-//     res.send("this is the response");
-// })
-
-// app.get('/api',(req,res)=>{
-//     res.json({message: 'this is my message'});
-// })
-
-app.use((req,res,next)=>{
-    console.log("inside index.js/backend");
-    next();
-})
-
 app.use("/api/v1/tasks", taskRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/auth", authRoutes);

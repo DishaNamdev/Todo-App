@@ -162,6 +162,6 @@ exports.protectRoute = async (req, res, next) => {
     return new AppError("Login again! Password was changed");
   }
   req.user = userOfDecodedId;
-  console.log("checking flow, req.user", req.user);
+  console.log("checking flow, req.user", req.user, req.body);
   next();
 };

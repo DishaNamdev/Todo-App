@@ -197,13 +197,14 @@ exports.updatePassword = async (req, res, next) => {
 };
 
 exports.updateMe = async (req, res) => {
+  console.log("watching req.body", req.body);
   if (!req.body.password) {
     return new AppError(
       "There's already a route defined for updating the password"
     );
   }
 
-  const filteredbody = filterObj(req.body);
+  const filteredbody = filterObj(req.body.data);
   const updatedUser = await User.findByIdAndUpdate(req.user._id, filteredbody, {
     new: true,
     runValidator: true,
